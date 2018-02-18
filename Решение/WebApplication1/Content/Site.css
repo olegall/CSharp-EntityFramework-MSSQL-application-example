@@ -1,0 +1,93 @@
+﻿
+
+/* Set padding to keep content from hitting the edges */
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Override the default bootstrap behavior where horizontal description lists 
+   will truncate terms that are too long to fit in the left column 
+*/
+.dl-horizontal dt {
+    white-space: normal;
+}
+
+/* Set width on the form input elements since they're 100% wide by default */
+input,
+select,
+textarea {
+    max-width: 280px;
+}
+
+h2 {
+    text-align: center;
+}
+
+p {
+    margin: 0;
+}
+
+.add-form {
+    margin-top: 10px;
+}
+
+.add-department {
+    margin-bottom: 20px;
+}
+
+.section-shift {
+    margin-left: 50px !important;
+}
+
+.group-shift {
+    margin-left: 100px !important;
+}
+
+.group-left-shift {
+    margin-left: 150px;
+}
+
+.sub-group-shift {
+    margin-left: 150px !important;
+    
+}
+
+.employee-info {
+    margin: 0 0 10px 40px !important;
+}
+
+.employee-bottom-shift {
+    margin-bottom: 10px;
+}
+
+.administration-employee {
+    margin: 0 0 10px 0 !important;
+}
+
+.section-employee {
+    margin: 0 0 10px 50px !important;
+}
+
+.group-employee {
+    margin: 0 0 10px 100px !important;
+}
+
+.radiobutton {
+    margin-right: 5px !important;
+}
+
+.edit-employee, 
+.delete-employee {
+    margin-top: 5px;
+}
+
+.delete-employee {
+    margin-left: -10px;
+}
+
+.col-md-2 {
+    padding-right: 0;
+}
+
+

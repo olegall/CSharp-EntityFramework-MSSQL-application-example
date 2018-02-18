@@ -1,0 +1,270 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+    @model IEnumerable<WebApplication1.Models.Administration>
+}
+
+<br><br>
+<h2>Иерархия организаций</h2>
+<input type="radio" class="radiobutton"><label class="new-adm">Новое управление</label><br>
+@foreach (var administration in Model)
+{  
+    <input type="radio" class="radiobutton"><label id="@administration.Id" class="administration">@administration.Title</label><br>
+    foreach (var section_ in administration.Sections)
+    {
+        <input type="radio" class="radiobutton section-shift"><label id="@section_.Id" class="section">@section_.Title</label><br>
+        foreach (var group in section_.Groups)
+        {
+            <input type="radio" class="radiobutton group-shift"><label id="@group.Id" class="group">@group.Title</label><br>
+            foreach (var employee in group.Employees)
+            {
+                <div class="row group-employee">
+                    <div class="col-md-2"><input type="text" class="last-name form-control" value="@employee.LastName"></div>
+                    <div class="col-md-2"><input type="text" class="first-name form-control" value="@employee.FirstName"></div>
+                    <div class="col-md-2"><input type="text" class="patronymic form-control" value="@employee.Patronymic"></div>
+                    <div class="col-md-1"><input type="button" id="@employee.Id" class="edit-employee  btn-xs btn-primary pull-left" value="Изменить"></div>
+                    <div class="col-md-1"><input type="button" id="@employee.Id" class="delete-employee  btn-xs btn-danger pull-left" value="Х"></div>
+                </div>
+            }
+            
+            int marginLeftVal = 100;
+            foreach (var subgroup in group.Subgroups)
+            {
+                marginLeftVal += 50;
+                string marginLeftProp = "margin-left: " + marginLeftVal.ToString() + "px !important";
+
+                <input type="radio" class="radiobutton" style="@marginLeftProp"><label id="@subgroup.Id" class="subgroup">@subgroup.Title</label><br>
+                foreach (var employee in subgroup.Employees)
+                {
+                    <div class="row employee-bottom-shift" style="@marginLeftProp;">
+                        <div class="col-md-2"><input type="text" class="last-name form-control" value="@employee.LastName"></div>
+                        <div class="col-md-2"><input type="text" class="first-name form-control" value="@employee.FirstName"></div>
+                        <div class="col-md-2"><input type="text" class="patronymic form-control" value="@employee.Patronymic"></div>
+                        <div class="col-md-1"><input type="button" id="@employee.Id" class="edit-employee  btn-xs btn-primary pull-left" value="Изменить"></div>
+                        <div class="col-md-1"><input type="button" id="@employee.Id" class="delete-employee  btn-xs btn-danger pull-left" value="Х"></div>
+                    </div>
+                }
+            }
+        }
+        foreach (var employee in section_.Employees)
+        {
+            <div class="row section-employee">
+                <div class="col-md-2"><input type="text" class="last-name form-control" value="@employee.LastName"></div>
+                <div class="col-md-2"><input type="text" class="first-name form-control" value="@employee.FirstName"></div>
+                <div class="col-md-2"><input type="text" class="patronymic form-control" value="@employee.Patronymic"></div>
+                <div class="col-md-1"><input type="button" id="@employee.Id" class="edit-employee btn-xs btn-primary pull-left" value="Изменить"></div>
+                <div class="col-md-1"><input type="button" id="@employee.Id" class="delete-employee btn-xs btn-danger pull-left" value="Х"></div>
+            </div>
+        }
+    }
+    foreach (var employee in administration.Employees)
+    {
+        <div class="row administration-employee">
+            <div class="col-md-2"><input type="text" class="last-name form-control" value="@employee.LastName"></div>
+            <div class="col-md-2"><input type="text" class="first-name form-control" value="@employee.FirstName"></div>
+            <div class="col-md-2"><input type="text" class="patronymic form-control" value="@employee.Patronymic"></div>
+            <div class="col-md-1"><input type="button" id="@employee.Id" class="edit-employee  btn-xs btn-primary pull-left" value="Изменить"></div>
+            <div class="col-md-1"><input type="button" id="@employee.Id" class="delete-employee  btn-xs btn-danger pull-left" value="Х"></div>
+        </div>
+    }
+}
+<div class="add-form"></div>
+
+<script>
+    $(document).ready(function () {
+        $('.add-form').append(getDepartmentAddForm()).append(getEmployeeAddForm());
+        $('.radiobutton:first').attr('checked', true);
+        disableEmployeeAdd();
+
+        $(document).on('click', '.radiobutton', function () {
+            $(this).prevAll().attr('checked', false);
+            $(this).nextAll().attr('checked', false);
+
+            enableDepartmentAdd();
+            enableEmployeeAdd();
+            let deptToAdd = $('.radiobutton:checked').next().attr('class');
+            switch (deptToAdd) {
+                case 'new-adm':
+                    $('.new-department').text('Новое управление');
+                    disableEmployeeAdd();
+                    break;
+                case 'administration':
+                    $('.new-department').text('Новый отдел');
+                    break;
+                case 'section':
+                    $('.new-department').text('Новая группа');
+                    break;
+                case 'group':
+                    $('.new-department').text('Новая группа');
+            }
+        });
+
+        $(document).on('click', '.add-department', function () {
+            let url;
+            let departmentId = $('.radiobutton:checked').next().attr('id');
+            let data = {
+                departmentId: departmentId,
+                title: $('.title').val()
+            };
+
+            let deptToAdd = $('.radiobutton:checked').next().attr('class');
+            switch (deptToAdd) {
+                case 'new-adm':
+                    url = '/Home/AddAdministration';
+                    delete data.departmentId;
+                    break;
+                case 'administration':
+                    url = '/Home/AddSection';
+                    break;
+                case 'section':
+                    url = '/Home/AddGroup';
+                    break;
+                case 'group':
+                    delete data.departmentId;
+                    url = '/Home/AddSubgroup';
+                    data.groupId = $('.radiobutton:checked').next().attr('id');
+                    break;
+                case 'subgroup':
+                    delete data.departmentId;
+                    url = '/Home/AddSubgroup';
+                    let group = $('.radiobutton:checked').prevUntil('.group').prev();
+                    data.groupId = group[group.length - 1].id;
+            }
+
+            let marginLeft = 'margin-left: '+(parseInt($('.radiobutton:checked').css('margin-left')) + 50) + 'px !important';
+            let departmentLastTag = $('.radiobutton:checked').next().next();
+
+            $.ajax({
+                url: url,
+                data: data,
+                success: function (result) {
+                    switch (deptToAdd) {
+                        case 'new-adm':
+                            $('.add-form').before('<input type="radio" class="radiobutton">\
+                                                   <label id="' + result.lastDeptId + '" class="administration">' + $('.title').val() + '</label><br>');
+                            break;
+                        case 'administration':
+                            departmentLastTag.after('<input type="radio" class="radiobutton section-shift">\
+                                                     <label id="' + result.lastDeptId + '" class="section">' + $('.title').val() + '</label><br>');
+                            break;
+                        case 'section':
+                            departmentLastTag.after('<input type="radio" class="radiobutton group-shift">\
+                                                     <label id="' + result.lastDeptId + '" class="group">' + $('.title').val() + '</label><br>');
+                            break;
+                        case 'group':
+                            departmentLastTag.after('<input type="radio" class="radiobutton" style="'+ marginLeft + '">\
+                                                     <label id="' + result.lastDeptId + '" class="subgroup" >' + $('.title').val() + '</label><br>');
+                            break;
+                        case 'subgroup':
+                            departmentLastTag.after('<input type="radio" class="radiobutton" style="' + marginLeft + '">\
+                                                     <label id="' + result.lastDeptId + '" class="subgroup" >' + $('.title').val() + '</label><br>');
+                    }
+                }
+            })
+        });
+
+        $(document).on('click', '.add-employee', function () {
+            let deptToAdd = $('.radiobutton:checked').next().attr('class');
+            let url = '/Home/AddEmployeeTo' + upFirstCharacter(deptToAdd);
+
+            let departmentId = $('.radiobutton:checked').next().attr('id');
+            let data = {
+                departmentId: departmentId,
+                lastName: $('.add-form .last-name').val(),
+                firstName: $('.add-form .first-name').val(),
+                patronymic: $('.add-form .patronymic').val()
+            };
+            let departmentLastTag = $('.radiobutton:checked').next().next();
+            let marginLeft = 'margin-left: ' + parseInt($('.radiobutton:checked').css('margin-left')) + 'px !important';
+
+            $.ajax({
+                url: url,
+                data: data,
+                success: function (result) {
+                    departmentLastTag.after(getNewEmployee(result.lastEmployeeId, data.lastName, data.firstName, data.patronymic, marginLeft));
+                }
+            })
+        });
+
+        $(document).on('click', '.edit-employee', function () {
+            $.ajax({
+                url: '/Home/EditEmployee',
+                data: {
+                    employeeId: $(this).attr('id'),
+                    lastName: $(this).parent().parent().find('.last-name').val(),
+                    firstName: $(this).parent().parent().find('.first-name').val(),
+                    patronymic: $(this).parent().parent().find('.patronymic').val(),
+                }
+            })
+        });
+
+        $(document).on('click', '.delete-employee', function () {
+            let this_ = $(this);
+            $.ajax({
+                url: '/Home/DeleteEmployee',
+                data: { employeeId: $(this).attr('id') },
+                success: function () {
+                    this_.parent().parent().remove();
+                }
+            })
+        });
+
+        function enableDepartmentAdd() {
+            $('.title').prop('disabled', false);
+            $('.add-department').prop("disabled", false);
+        }
+
+        function disableDepartmentAdd() {
+            $('.title').prop('disabled', true);
+            $('.add-department').prop("disabled", true);
+        }
+
+        function enableEmployeeAdd() {
+            $('.add-form .first-name, .add-form .last-name, .add-form .patronymic').prop('disabled', false);
+            $('.add-form .add-employee').prop("disabled", false);
+        }
+
+        function disableEmployeeAdd() {
+            $('.add-form .first-name, .add-form .last-name, .add-form .patronymic').prop('disabled', true);
+            $('.add-form .add-employee').prop("disabled", true);
+        }
+
+        function upFirstCharacter(deptName) {
+            return deptName.charAt(0).toUpperCase() + deptName.slice(1);
+        }
+
+        function getDepartmentAddForm() {
+            return '<label class="new-department">Новое управление</label>\
+                    <div class="row">\
+                        <div class="col-md-2"><input type="text" class="title form-control" placeholder="Название"></div>\
+                        <div class="col-md-2"><input type="button" class="add-department btn btn-primary" value="Добавить"></div>\
+                    </div>';
+        }
+
+        function getEmployeeAddForm() {
+            return '<label>Новый сотрудник</label>\
+                    <div class="row">\
+                         <div class="col-md-2"><input type="text" class="last-name form-control" placeholder="Фамилия"></div>\
+                         <div class="col-md-2"><input type="text" class="first-name form-control" placeholder="Имя"></div>\
+                         <div class="col-md-2"><input type="text" class="patronymic form-control"  placeholder="Отчество"></div>\
+                         <div class="col-md-2"><input type="button" class="add-employee btn btn-primary" value="Добавить"></div>\
+                    </div>';
+        }
+
+        function getAdministration(title) {
+            return '<div class="administration-wrapper">\
+                        <input type="button" class="show-groups btn btn-primary" value="+">\
+                        <input type="text" class="administration form-control" value = "'+ title + '">\
+                    </div>';
+        }
+
+        function getNewEmployee(id, lastName, firstName, patronymic, marginLeft){
+            return '<div class="row employee-bottom-shift" style="' + marginLeft + '">\
+                         <div class="col-md-2"><input type="text" class="last-name form-control" value="'+lastName+'"></div>\
+                         <div class="col-md-2"><input type="text" class="first-name form-control" value="'+firstName+'"></div>\
+                         <div class="col-md-2"><input type="text" class="patronymic form-control" value="'+patronymic+'"></div>\
+                         <div class="col-md-1"><input type="button" id="'+id+'" class="edit-employee  btn-xs btn-primary pull-left" value="Изменить"></div>\
+                         <div class="col-md-1"><input type="button" id="'+id+'" class="delete-employee  btn-xs btn-danger pull-left" value="Х"></div>\
+                    </div>';
+        }
+    });
+</script>
